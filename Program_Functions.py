@@ -20,46 +20,21 @@ def get_distance_from_current_location(point):
     g = geocoder.ip('me')
     lat, long = g.latlng
     current_location = Point(lat, long)
-    for sentence in review_arr:
-        results = sid.polarity_scores(sentence)
-        total_sentiment_value += results['compound']
-        no_of_sentences += 1
-
-    sentiment = float(total_sentiment_value / no_of_sentences)
-
-    return sentiment
+    return current_location.distance(point)
 
 
-def getAvgReviews(id, headers):
-    #url = "https://api.yelp.com/v3/businesses/" + id + "/reviews"
-    url = "https://api.yelp.com/v3/businesses/" + id
-    req = requests.get(url, headers=headers)
-
-    business = json.loads(req.text)
-
-    # with open('reviews.txt', 'w') as outfile:
-    #     json.dump(reviews, outfile, indent=4, sort_keys=True)
-
-    return business['rating']
-
-def getReviewCount(id, headers):
-    url = "https://api.yelp.com/v3/businesses/" + id + "/reviews"
-    req = requests.get(url, headers=headers)
-    reviews = json.loads(req.text)
-
-    return len(reviews['reviews'])    return current_location.distance(point)
-
-def yelp():
+def yelp(restaurant_name, address, city, state, zipcode):
+    data = load_data()
     api_key = get_yelp_api_key()
     headers = {'Authorization': 'Bearer %s' % api_key}
 
     url = 'https://api.yelp.com/v3/businesses/matches'
 
-    params = {'name': 'The Habit Burger Grill',
-              'address1': '604 S Mooney Blvd',
-              'city': 'Visalia',
-              'state': 'CA',
-              'zip_code': '93277',
+    params = {'name': restaurant_name,
+              'address1': address,
+              'city': city,
+              'state': state,
+              'zip_code': zipcode,
               'country': 'US'}
 
     req = requests.get(url, params=params, headers=headers)
@@ -71,40 +46,19 @@ def yelp():
 
     id = json_data['businesses'][0]['id']
 
-    print(getAvgReviews(id, headers))
-    print(getReviewCount(id, headers))
-
-def getSentiment(review_arr):
-    sid = SentimentIntensityAnalyzer()
-    total_sentiment_value = 0
-    no_of_sentences = 0
-
-    for sentence in review_arr:
-        results = sid.polarity_scores(sentence)
-        total_sentiment_value += results['compound']
-        no_of_sentences += 1
-
-    sentiment = float(total_sentiment_value / no_of_sentences)
-
-    return sentiment
+    avg_reviews = getAvgReviews(id, headers)
+    review_count = getReviewCount(id, headers)
+    return avg_reviews, review_count
 
 
 def getAvgReviews(id, headers):
-    #url = "https://api.yelp.com/v3/businesses/" + id + "/reviews"
     url = "https://api.yelp.com/v3/businesses/" + id
-
     req = requests.get(url, headers=headers)
-
     business = json.loads(req.text)
-
-    # with open('reviews.txt', 'w') as outfile:
-    #     json.dump(reviews, outfile, indent=4, sort_keys=True)
-
     return business['rating']
 
 def getReviewCount(id, headers):
     url = "https://api.yelp.com/v3/businesses/" + id + "/reviews"
     req = requests.get(url, headers=headers)
     reviews = json.loads(req.text)
-
     return len(reviews['reviews'])
