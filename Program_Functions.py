@@ -11,13 +11,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from Get_Yelp_API_Key import get_yelp_api_key
 
-"""
-pip installs:
-    pip install shapely
-    pip install geocoder
-    pip install geopandas
-    pip install pandas
-"""
 def load_data():
     data = pd.read_csv('Cleaned_Tacos.csv')
     data = geopandas.GeoDataFrame(data, geometry=geopandas.points_from_xy(data.longitude, data.latitude))
