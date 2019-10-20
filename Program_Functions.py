@@ -10,6 +10,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import requests
 import json
 import math
+import os
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
 
@@ -110,17 +111,16 @@ def print_results_nicely(restaurants):
 
 
 def save_user_choice(restaurant):
+    fileName = os.getcwd() + '/User_Picks.csv'
+    if os.path.exists(fileName):
+        user_choices = pd.read_csv(fileName)
+
     restaurant = pd.DataFrame(restaurant).T
-    print(restaurant)
-    print(restaurant.columns)
-    # for column in restaurant.index:
-    #     if 'unnamed' in column.lower():
-    #         restaurant = restaurant.drop(labels = [column])
-    # print(restaurant.index)
-    # # for column in restaurant.column:
-    # #     if 'unnamed' in column.lower():
-    # #         restaurant.drop(column, axis = 1)
-    # restaurant.to_csv('User_Picks.csv')
+    for column in restaurant.columns:
+        if 'unnamed' in column.lower():
+            restaurant = restaurant.drop(column, axis = 1)
+    user_choices_updated = pd.concat([restaurant, user_choices], sort=False)
+    user_choices_updated.to_csv('User_Picks.csv')
 
 def main(budget, zipcode):
     zipcode = str(zipcode)
@@ -128,7 +128,7 @@ def main(budget, zipcode):
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
     print_results_nicely(rated_restaurants.iloc[:10])
-    save_user_choice(rated_restaurants.iloc[0])
+    save_user_choice(rated_restaurants.iloc[3])
 
 
 main(30, 77840)
