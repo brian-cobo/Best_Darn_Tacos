@@ -1,3 +1,5 @@
+# !/usr/bin/env python -W ignore::DeprecationWarning
+
 from shapely.geometry import Point
 import geocoder
 import pandas as pd
@@ -19,7 +21,7 @@ from Get_Yelp_API_Key import get_yelp_api_key
 """
 def load_data():
     data = pd.read_csv('Cleaned_Tacos.csv')
-    data = geopandas.GeoDataFrame(data, geometry=geopandas.points_from_xy(data.longitude, data.latitude))
+    data = pd.DataFrame(geopandas.GeoDataFrame(data, geometry=geopandas.points_from_xy(data.longitude, data.latitude)))
     data['score'] = 0
     return data
 
@@ -79,43 +81,34 @@ def getReviewCount(id, headers):
     return len(reviews['reviews'])
 
 def rate_restaurants(budget,
-                     yelp_rating,
-                     yelp_review_count,
                      restaurants):
 
-    len(restaurants)
     for i in range(len(restaurants)):
         try:
+            avg_reviews, review_count, price = yelp(restaurants.name,
+                     restaurants.address,
+                     restaurants.city,
+                     restaurants.province,
+                     restaurants.postalCode)
             distance = (0 - get_distance_from_current_location(restaurants.iloc[i].geometry)) * 0.01
             budget = ((budget - restaurants.iloc[i].priceRangeMax) + (budget - restaurants.iloc[i].priceRangeMin)) * 0.3
             if math.isnan(budget):
                 budget = -25
-            yelp = (yelp_rating * yelp_review_count) * 0.1
-            score = round((distance + budget + yelp), 5)
-            restaurants.iloc[i].score = score
+            yelp = (avg_reviews * review_count) * 0.1
+            score = float(round((distance + budget + yelp), 5))
+            restaurants.set_value(i, 'score', score)
         except Exception as e:
             pass
-    print(restaurants.score)
+    restaurants = restaurants.sort_values(by='score')
     return restaurants
 
-
-
-
-
-data = load_data()
-yelp_rating = 4.5
-yelp_review_count = 29
-
-
-score = rate_restaurants(20, yelp_rating, yelp_review_count, data.head())
-
-
-# if __name__ == "__main__":
-#     print('Best Darn Taco Finder\n')
-#     zipcode = input('Enter your zipcode: ')
-#     budget = int(input('Enter your budget for your meal: '))
-#     taco_data = load_data()
-#     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
-
+if __name__ == "__main__":
+    print('Best Darn Taco Finder\n')
+    zipcode = input('Enter your zipcode: ')
+    budget = int(input('Enter your budget for your meal: '))
+    taco_data = load_data()
+    restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
+    rated_restaurants = rate_restaurants(budget, restaurants)
+    print(rated_restaurants.iloc[:10].name)
 
 
