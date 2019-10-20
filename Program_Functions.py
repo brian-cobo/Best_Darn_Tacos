@@ -103,17 +103,24 @@ def rate_restaurants(budget,
     return restaurants
 
 def print_results_nicely(restaurants):
+    reccomendations = []
     for i in range(len(restaurants)):
-        try:
-            print(f'\nWe recommend the {restaurants.iloc[i]["menus.name"]}'
-                  f'\nFrom {restaurants.iloc[i].loc["name"]}'
-                  f'\n{restaurants.iloc[i].address} '
-                  f'\n{restaurants.iloc[i].postalCode}, {restaurants.iloc[i].city}, {restaurants.iloc[i].province} ')
-            if restaurants.iloc[i].loc["priceRangeMax"] > 0 and restaurants.iloc[i].loc["priceRangeMin"]:
-                print(f'Min: ${restaurants.iloc[i].loc["priceRangeMin"]}, '
-                      f'Max: ${restaurants.iloc[i].loc["priceRangeMax"]}')
-        except Exception as e:
-            print('Error', e)
+        reccomendations.append(restaurants.iloc[i].to_dict())
+    return reccomendations
+
+
+def save_user_choice(restaurant):
+    restaurant = pd.DataFrame(restaurant).T
+    print(restaurant)
+    print(restaurant.columns)
+    # for column in restaurant.index:
+    #     if 'unnamed' in column.lower():
+    #         restaurant = restaurant.drop(labels = [column])
+    # print(restaurant.index)
+    # # for column in restaurant.column:
+    # #     if 'unnamed' in column.lower():
+    # #         restaurant.drop(column, axis = 1)
+    # restaurant.to_csv('User_Picks.csv')
 
 def main(budget, zipcode):
     zipcode = str(zipcode)
@@ -121,6 +128,7 @@ def main(budget, zipcode):
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
     print_results_nicely(rated_restaurants.iloc[:10])
+    save_user_choice(rated_restaurants.iloc[0])
 
 
 main(30, 77840)
