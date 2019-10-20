@@ -102,13 +102,25 @@ def rate_restaurants(budget,
     restaurants = restaurants.sort_values(by='score')
     return restaurants
 
-if __name__ == "__main__":
-    print('Best Darn Taco Finder\n')
-    zipcode = input('Enter your zipcode: ')
-    budget = int(input('Enter your budget for your meal: '))
+def print_results_nicely(restaurants):
+    for i in range(len(restaurants)):
+        try:
+            print(f'\nWe recommend the {restaurants.iloc[i]["menus.name"]}'
+                  f'\nFrom {restaurants.iloc[i].loc["name"]}'
+                  f'\n{restaurants.iloc[i].address} '
+                  f'\n{restaurants.iloc[i].postalCode}, {restaurants.iloc[i].city}, {restaurants.iloc[i].province} ')
+            if restaurants.iloc[i].loc["priceRangeMax"] > 0 and restaurants.iloc[i].loc["priceRangeMin"]:
+                print(f'Min: ${restaurants.iloc[i].loc["priceRangeMin"]}, '
+                      f'Max: ${restaurants.iloc[i].loc["priceRangeMax"]}')
+        except Exception as e:
+            print('Error', e)
+
+def main(budget, zipcode):
+    zipcode = str(zipcode)
     taco_data = load_data()
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
-    print(rated_restaurants.iloc[:10].name)
+    print_results_nicely(rated_restaurants.iloc[:10])
 
 
+main(30, 77840)
