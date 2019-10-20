@@ -62,3 +62,17 @@ def getReviewCount(id, headers):
     req = requests.get(url, headers=headers)
     reviews = json.loads(req.text)
     return len(reviews['reviews'])
+
+def rate_restaurants(budget,
+                     yelp_rating,
+                     yelp_review_count,
+                     data_row):
+    distance = (0 - get_distance_from_current_location(data_row.geometry)) * 0.01
+    budget = ((budget - data_row.priceRangeMax) + (budget - data_row.priceRangeMin)) * 0.3
+    yelp = (yelp_rating * yelp_review_count) * 0.1
+    return (distance + budget + yelp)
+
+
+
+
+
