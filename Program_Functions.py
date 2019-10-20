@@ -94,7 +94,10 @@ def rate_restaurants(budget,
                      restaurants.province,
                      restaurants.postalCode)
             distance = (0 - get_distance_from_current_location(restaurants.iloc[i].geometry)) * 0.01
-            budget = ((budget - restaurants.iloc[i].priceRangeMax) + (budget - restaurants.iloc[i].priceRangeMin)) * 0.3
+            budget = ((budget - restaurants.iloc[i].priceRangeMax) +
+                      (budget - restaurants.iloc[i].priceRangeMin) -
+                      (budget - np.mean(restaurants.iloc[i].priceRangeMax +
+                                        restaurants.iloc[i].priceRangeMin))) * 0.3
             if math.isnan(budget):
                 budget = -25
             yelp = (avg_reviews * review_count) * 0.1
