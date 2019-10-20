@@ -83,7 +83,7 @@ def getReviewCount(id, headers):
 
 def rate_restaurants(budget,
                      restaurants):
-
+®
     for i in range(len(restaurants)):
         try:
             avg_reviews, review_count, price = yelp(restaurants.name,

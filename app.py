@@ -1,4 +1,9 @@
 from flask import Flask, render_template, request, jsonify, url_for
+from testFunctions import rList
+import pandas as pd
+import json
+
+
 
 app = Flask(__name__)
 
@@ -14,8 +19,11 @@ def parse_data():
         budget = data['budget']
         zipCode = data['zipCode']
 
+        rlist = rList()
+        rstring = json.dumps(rlist)
+
         print(budget, zipCode)
-        return jsonify(data)
+        return rstring
     else:
         return render_template('index.html')
 
