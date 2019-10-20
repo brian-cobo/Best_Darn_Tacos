@@ -1,6 +1,7 @@
 Idea: Find the best taco place near you
 Input: Zip Code, City, State, Radius, Budget
 Output: List of n number of best taco places in your radius and budget
+
 Algorithm:
     * Find reviews on each taco place
         * rate reviews based on stars given and number of reviews
@@ -10,3 +11,23 @@ Algorithm:
         * best reviews
 
     example: y = 0.3 * (mileage) + 0.5 * (reviews) + 0.2 * (price)
+
+find nearest restaurant(city, state, zipcode, lat, long)
+    pandas parses for zipcode first then finds distances with lat long
+
+get yelp reviews(restaurant):
+    with restaurant name as input, get yelp reviews, ratings, number of reviews, and sentiment analysis
+
+rate the restaurant(distance, ratings, budget?):
+    use our own algorithm to rate the restaurants based on our criteria
+    # $ <= 10
+    # $$ >=11 , $$ <= 30
+    # $$$ >=31, $$$ <=60
+    # $$$$ >61
+
+
+Extra Idea: Create personalized reccomendations based on what you chose
+Algorithms:
+    Look for trends and similar information based on the restaurants you picked
+        ex: if you pick cheap restaurants, the program will look for cheap restaurants to reccomend to you
+    Once you pick a restaurant, it saves it into its own file
