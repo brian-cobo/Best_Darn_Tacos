@@ -1,0 +1,12 @@
+Idea: Find the best taco place near you
+Input: Zip Code, City, State, Radius, Budget
+Output: List of n number of best taco places in your radius and budget
+Algorithm:
+    * Find reviews on each taco place
+        * rate reviews based on stars given and number of reviews
+    * With the radius inputted, and the budget, find the restaurants that are
+        * closest to you
+        * in budget range
+        * best reviews
+
+    example: y = 0.3 * (mileage) + 0.5 * (reviews) + 0.2 * (price)
