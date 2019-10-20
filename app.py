@@ -38,6 +38,7 @@ def chosenData():
         
         data = request.json
         rstring = data["restList"]
+        print(type(rstring))
         save_user_choice(rstring)
 
         #print(rstring)
