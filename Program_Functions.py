@@ -82,7 +82,7 @@ def getReviewCount(id, headers):
 
 def rate_restaurants(budget,
                      restaurants):
-
+®
     for i in range(len(restaurants)):
         try:
             avg_reviews, review_count, price = yelp(restaurants.name,
@@ -109,6 +109,7 @@ if __name__ == "__main__":
     taco_data = load_data()
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
-    print(rated_restaurants.iloc[:10].name)
-
+    rated_restaurants = rated_restaurants.to_dict()
+    print(rated_restaurants)
+    
 
