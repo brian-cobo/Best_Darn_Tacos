@@ -9,6 +9,7 @@ import json
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import requests
 import json
+import codecs
 import math
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
@@ -20,7 +21,7 @@ from Get_Yelp_API_Key import get_yelp_api_key
     convert price into $$$$ signs
 """
 def load_data():
-    data = pd.read_csv('Cleaned_Tacos.csv')
+    data = pd.read_csv('/Users/avmachine/Best_Darn_Tacos/Cleaned_tacos.csv')
     data = pd.DataFrame(geopandas.GeoDataFrame(data, geometry=geopandas.points_from_xy(data.longitude, data.latitude)))
     data['score'] = 0
     return data
@@ -33,12 +34,16 @@ def get_restaurants_in_same_zipcode(data, zipcode):
     else:
         return query_results
 
+# def get_distance_from_current_location(point):
+#     g = geocoder.ip('me')
+#     lat, long = g.latlng
+#     current_location = Point(lat, long)
+#     return current_location.distance(point)
+
 def get_distance_from_current_location(point):
     g = geocoder.ip('me')
     lat, long = g.latlng
-    current_location = Point(lat, long)
-    return current_location.distance(point)
-
+    return lat, long
 
 def yelp(restaurant_name, address, city, state, zipcode):
     data = load_data()
@@ -82,7 +87,7 @@ def getReviewCount(id, headers):
 
 def rate_restaurants(budget,
                      restaurants):
-®
+
     for i in range(len(restaurants)):
         try:
             avg_reviews, review_count, price = yelp(restaurants.name,
@@ -96,7 +101,7 @@ def rate_restaurants(budget,
                 budget = -25
             yelp = (avg_reviews * review_count) * 0.1
             score = float(round((distance + budget + yelp), 5))
-            restaurants.set_value(i, 'score', score)
+            restaurants.set_value(i, 'score', int(score))
         except Exception as e:
             pass
     restaurants = restaurants.sort_values(by='score')
@@ -110,9 +115,11 @@ def print_results_nicely(restaurants):
 
 
 def save_user_choice(restaurant):
-    restaurant = pd.DataFrame(restaurant).T
-    print(restaurant)
-    print(restaurant.columns)
+    restaurant = pd.DataFrame.from_dict(restaurant, index=0)
+    print('Restaurant', restaurant)
+    # restaurant = pd.DataFrame(restaurant).T
+    # print(restaurant)
+    # print(restaurant.columns)
     # for column in restaurant.index:
     #     if 'unnamed' in column.lower():
     #         restaurant = restaurant.drop(labels = [column])
@@ -122,13 +129,20 @@ def save_user_choice(restaurant):
     # #         restaurant.drop(column, axis = 1)
     # restaurant.to_csv('User_Picks.csv')
 
+def _convert(dct):
+    return dict((str(k),v) for k, v in dct.items())
+
 def main(budget, zipcode):
     zipcode = str(zipcode)
     taco_data = load_data()
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
-    print_results_nicely(rated_restaurants.iloc[:10])
-    save_user_choice(rated_restaurants.iloc[0])
+    rlist = print_results_nicely(rated_restaurants.iloc[:10])
+    #save_user_choice(rated_restaurants.iloc[0])
 
+    for sub in rlist:
+        for key in sub:
+            sub[key] = str(sub[key])
+    return rlist
 
 main(30, 77840)
