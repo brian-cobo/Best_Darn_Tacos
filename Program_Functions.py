@@ -9,6 +9,8 @@ import requests
 import json
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+from Get_Yelp_API_Key import get_yelp_api_key
+
 """
 pip installs:
     pip install shapely
@@ -38,7 +40,6 @@ def get_distance_from_current_location(point):
 def getAvgReviews(id, headers):
     #url = "https://api.yelp.com/v3/businesses/" + id + "/reviews"
     url = "https://api.yelp.com/v3/businesses/" + id
-
     req = requests.get(url, headers=headers)
 
     business = json.loads(req.text)
@@ -56,8 +57,7 @@ def getReviewCount(id, headers):
     return len(reviews['reviews'])    return current_location.distance(point)
 
 def yelp():
-    api_key = "wZXDDOObrB3lATQS0WtLQ3RIsh8ODhVEReu4innbHyUYfEnrrDDfbdblnMvkXW05EzPTwWZVBKnI-6Y1VoyojN-ftfgOdghxN2kZ2SafoGZdtk8VC_lDhv5VOs-rXXYx"
-
+    api_key = get_yelp_api_key()
     headers = {'Authorization': 'Bearer %s' % api_key}
 
     url = 'https://api.yelp.com/v3/businesses/matches'
