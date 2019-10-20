@@ -11,8 +11,11 @@ import requests
 import json
 import math
 import os
+import re
+import difflib
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
+from collections import Counter
 
 from Get_Yelp_API_Key import get_yelp_api_key
 
@@ -83,7 +86,6 @@ def getReviewCount(id, headers):
 
 def rate_restaurants(budget,
                      restaurants):
-®
     for i in range(len(restaurants)):
         try:
             avg_reviews, review_count, price = yelp(restaurants.name,
@@ -96,7 +98,8 @@ def rate_restaurants(budget,
             if math.isnan(budget):
                 budget = -25
             yelp = (avg_reviews * review_count) * 0.1
-            score = float(round((distance + budget + yelp), 5))
+            score = make_personalized_reccomendations(restaurants)
+            score += float(round((distance + budget + yelp), 5))
             restaurants.set_value(i, 'score', score)
         except Exception as e:
             pass
@@ -112,15 +115,57 @@ def print_results_nicely(restaurants):
 
 def save_user_choice(restaurant):
     fileName = os.getcwd() + '/User_Picks.csv'
+    restaurant = pd.DataFrame(restaurant).T
+    if os.path.exists(fileName):
+        user_choices = pd.read_csv(fileName)
+        user_choices_updated = pd.concat([restaurant, user_choices], sort=False)
+    else:
+        user_choices_updated = restaurant
+    for column in user_choices_updated.columns:
+        if 'unnamed' in column.lower():
+            user_choices_updated = user_choices_updated.drop(column, axis = 1)
+    user_choices_updated.to_csv('User_Picks.csv')
+
+def split_words_into_list(user_data):
+    user_categ_data = []
+    try:
+        for entry in user_data:
+            if type(entry) == str:
+                entry = re.sub(r"[,.;@#?!&$1-9]+\ *", " ", entry)
+                user_categ_data.append(entry)
+        return user_categ_data
+    except:
+        return None
+
+def weight_categorical_data(user_data, new_choice):
+    new_choice = str(new_choice)
+    user_data = str(user_data)
+    seq = difflib.SequenceMatcher(None, new_choice, user_data)
+    d = seq.ratio()
+    return d
+
+
+def make_personalized_reccomendations(restaurant):
+    fileName = os.getcwd() + '/User_Picks.csv'
     if os.path.exists(fileName):
         user_choices = pd.read_csv(fileName)
 
-    restaurant = pd.DataFrame(restaurant).T
-    for column in restaurant.columns:
-        if 'unnamed' in column.lower():
-            restaurant = restaurant.drop(column, axis = 1)
-    user_choices_updated = pd.concat([restaurant, user_choices], sort=False)
-    user_choices_updated.to_csv('User_Picks.csv')
+        menu_desc_score = weight_categorical_data(user_data=user_choices["menus.description"],
+                                                  new_choice=restaurant["menus.description"])
+        menu_name_score = weight_categorical_data(user_data=user_choices["menus.name"],
+                                                  new_choice=restaurant["menus.name"])
+        restaurant_name_score = weight_categorical_data(user_data=user_choices["name"],
+                                                  new_choice=restaurant["name"])
+        category_score = weight_categorical_data(user_data=user_choices["categories"],
+                                                  new_choice=restaurant["categories"])
+        user_num_choices = len(user_choices)
+        score = (menu_desc_score * user_num_choices +
+                 menu_name_score * user_num_choices +
+                 restaurant_name_score * user_num_choices +
+                 category_score * user_num_choices) / user_num_choices * 11
+        return score
+    else:
+        return 0
 
 def main(budget, zipcode):
     zipcode = str(zipcode)
@@ -128,7 +173,9 @@ def main(budget, zipcode):
     restaurants = get_restaurants_in_same_zipcode(taco_data, zipcode)
     rated_restaurants = rate_restaurants(budget, restaurants)
     print_results_nicely(rated_restaurants.iloc[:10])
-    save_user_choice(rated_restaurants.iloc[3])
+    for i in range(len(rated_restaurants.iloc[:5])):
+        print(rated_restaurants.iloc[i])
+
 
 
 main(30, 77840)
