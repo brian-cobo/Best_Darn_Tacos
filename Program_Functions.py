@@ -103,7 +103,8 @@ def rate_restaurants(budget,
             restaurants.set_value(i, 'score', score)
         except Exception as e:
             pass
-    restaurants = restaurants.sort_values(by='score')
+    restaurants = restaurants.sort_values(by=['score'])
+    restaurants.drop_duplicates('name', inplace=True)
     return restaurants
 
 def print_results_nicely(restaurants):
