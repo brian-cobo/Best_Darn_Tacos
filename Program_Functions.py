@@ -49,6 +49,21 @@ def get_distance_from_current_location(point):
     lat, long = g.latlng
     return lat, long
 
+def getImage(img_id):
+    api_key = get_yelp_api_key()
+    headers = {'Authorization': 'Bearer %s' % api_key}
+
+    url = 'https://api.yelp.com/v3/businesses/' + img_id
+
+    req = requests.get(url, headers=headers)
+
+    json_data = json.load(req.txt)
+
+    image_url = json_data['image_url']
+    print(json_data)
+    return image_url
+
+
 def yelp(restaurant_name, address, city, state, zipcode):
     data = load_data()
     api_key = get_yelp_api_key()
