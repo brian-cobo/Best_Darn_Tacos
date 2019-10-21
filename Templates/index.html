@@ -1,0 +1,145 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+<div class='container-fluid' style="display: inline-block; text-align: center">
+    <div class='col' style="display: inline-block; text-align: center">
+        <div class="card">
+            <div class="card-header" style="text-align: center;">
+                <h2>Find your match, don't lettuce slip away! </h2>
+                
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Choose your options</h5>
+                <div class='row'>
+                        <div class='col'>Please enter your Zip Code:</div>
+                        <div class='col'><input id="zipCode" type="text" placeholder="Zip Code"></div>
+                </div>
+            <div class='row'>
+                    <div class='col'>Please enter your max budget:</div>
+                    <div class='col'><input id="budget" type="text" placeholder="How much?"></div>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+               <button type="button" class="btn btn-primary" id="submit" onclick="submit(); getLocation()">Submit</button>
+            </div>
+        </div>
+        <div class="container-fluid" id="title" style="display: none; text-align: center"><h1>Your personalized choices:</h1></div>
+        <div class="container-fluid" id="cheapTacos" style="display: flex; justify-content: center; flex-wrap: wrap;
+        width: 100%;
+        background: #eee;
+        margin: 10px auto;
+        position: relative;"></div>
+        </div>
+</div>
+
+<script>
+
+var x = document.getElementById("submit");
+var my_longitude;
+var my_latitude;
+function getLocation() {
+ if (navigator.geolocation) {
+   navigator.geolocation.getCurrentPosition(showPosition);
+ } else {
+   x.innerHTML = "Geolocation is not supported by this browser.";
+ }
+}
+
+function showPosition(position) {
+    my_longitude = position.coords.longitude
+    my_latitude = position.coords.latitude
+}
+
+var restList;
+
+function submit(){
+    var budget = $("#budget").val();
+    var zipCode = $("#zipCode").val();
+
+    console.log(budget);
+    console.log(zipCode);
+
+    var result;
+    var sendData = {"budget": budget, "zipCode": zipCode};
+    $.ajax({
+        type: 'POST',
+        url: '/parse_data',
+        data: JSON.stringify(sendData),
+        contentType: 'application/json',
+        success: function(rstring){
+            rstring = JSON.parse(rstring)
+            restList = rstring
+            var off=document.getElementById('title');
+            off.style.display = "inline-block";
+
+            for (var i = 0; i < 10; i++) 
+            {
+                var id = rstring[i].id;
+                var name = rstring[i].name;
+                var address = rstring[i].address;
+                var city = rstring[i].city;
+                var lowCost = rstring[i].priceRangeMin;
+                var highCost = rstring[i].priceRangeMax;
+                var lngt = rstring[i].longitude;
+                var lati = rstring[i].latitude;
+                var destination = (lati == 'nan' || lngt == 'nan') ? name : lati + "," + lngt;
+
+
+                var origin = "187 Corrington Drive, College Station, TX 77843";
+                origin = origin.split(",");
+                var my_origin = "";
+                for(let i = 0; i< origin.length-1; i++) {
+                    my_origin += origin[i] + "+";
+                }
+
+                my_origin += origin[origin.length-1];
+
+                lowCost = (lowCost=="nan") ? 0: lowCost;
+                highCost = (highCost=="nan") ? 20: highCost;
+                
+                
+                var gooMapURL = "https://www.google.com/maps/dir/?api=1&origin=" + origin + "&destination=" + destination;
+                console.log(gooMapURL);
+                $("#cheapTacos").after('<div class="row"><h3><a onclick="chosenOne('+i+')" href="'+gooMapURL + '" target="_blank">' +name + '</a></h3></div>');
+                $("#cheapTacos").next().append('<div class="row col-12">' + address+'</div>');
+                $("#cheapTacos").next().append('<div class="row col-12">' + city + '</div>');
+                $("#cheapTacos").next().append('<div class="row col-12">$' + lowCost+ ' - $'+ highCost+' </div> ');
+                $("#cheapTacos").next().append('<u>');
+            }
+        }
+});
+}
+
+function chosenOne(i){
+
+    var sendData = {'restList': restList[i]};
+    $.ajax({
+        type: 'POST',
+        url: '/chosenData',
+        data: JSON.stringify(sendData),
+        contentType: 'application/json',
+        success: function(rstring){
+           console.log("success");
+            }
+        }
+    );
+}
+
+<!--function getYelp(id) {-->
+
+    <!--var sendData = {'id': id}-->
+    <!--$.ajax({-->
+        <!--type: 'POST',-->
+        <!--url: '/getImage',-->
+        <!--data: JSON.stringify(sendData),-->
+        <!--contentType: 'application/json',-->
+        <!--success: function(img_string){-->
+           <!--console.log("success");-->
+           <!--return img_string;-->
+            <!--}-->
+        <!--}-->
+    <!--);-->
+<!--}-->
+
+</script>
+{%endblock%}

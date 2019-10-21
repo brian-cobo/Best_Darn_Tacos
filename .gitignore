@@ -9,4 +9,6 @@
 !app.py
 !Program_Functions.py
 !Cleaned_tacos.csv
-!index.html
+!Templates/index.html
+!Templates/layout.html
+!Templates
