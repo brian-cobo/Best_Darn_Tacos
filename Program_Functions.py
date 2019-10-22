@@ -25,7 +25,7 @@ from Get_Yelp_API_Key import get_yelp_api_key
     convert price into $$$$ signs
 """
 def load_data():
-    data = pd.read_csv(os.getcwd() + '/Cleaned_tacos.csv')
+    data = pd.read_csv(os.getcwd() + '/Best_Darn_Tacos/Cleaned_tacos.csv')
     data = pd.DataFrame(geopandas.GeoDataFrame(data, geometry=geopandas.points_from_xy(data.longitude, data.latitude)))
     data['score'] = 0
     return data
@@ -141,7 +141,7 @@ def save_user_choice(restaurant):
 
     restaurant = pd.DataFrame(restaurant, index=[0])
 
-    fileName = os.getcwd() + '/User_Picks.csv'
+    fileName = os.getcwd() + '/Best_Darn_Tacos/User_Picks.csv'
 
     if os.path.exists(fileName):
         user_choices = pd.read_csv(fileName)
@@ -173,7 +173,7 @@ def weight_categorical_data(user_data, new_choice):
 
 
 def make_personalized_reccomendations(restaurant):
-    fileName = os.getcwd() + '/User_Picks.csv'
+    fileName = os.getcwd() + '/Best_Darn_Tacos/User_Picks.csv'
     if os.path.exists(fileName):
         user_choices = pd.read_csv(fileName)
 
